@@ -1,0 +1,112 @@
+// This is your Binary file target for schema definition.
+// Learn more about it in the Prisma docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String   @id @default(uuid())
+  username      String   @unique
+  email         String   @unique
+  name          String
+  password      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([username])
+  @@index([email])
+}
+
+model Goal {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  category      String
+  status        String
+  targetDate    DateTime?
+  userId        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  
+  tasks         Task[]        @relation("TaskGoal")
+}
+
+model Task {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  date          String
+  time          String?
+  completed     Boolean  @default(false)
+  goalId        String
+  userId        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([goalId])
+  
+  photos        Photo[]
+  learnings     Learning[]
+  notes         Note[]
+  reminders     Reminder[]
+
+  goal          Goal           @relation("TaskGoal", fields: [goalId], references: [id])
+}
+
+model Photo {
+  id       String   @id @default(uuid())
+  taskId   String
+  url      String
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
+  
+  task      Task @relation(fields: [taskId], references: [id])
+}
+
+model Learning {
+  id       String   @id @default(uuid())
+  taskId   String
+  content  String
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
+  
+  task      Task @relation(fields: [taskId], references: [id])
+}
+
+model Note {
+  id       String   @id @default(uuid())
+  taskId   String
+  content  String
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
+  
+  task      Task @relation(fields: [taskId], references: [id])
+}
+
+model Reminder {
+  id         String   @id @default(uuid())
+  taskId     String?
+  title       String
+  message    String?
+  date        String
+  time        String
+  type        String
+  triggered   Boolean  @default(false)
+  userId      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  
+  task        Task?            @relation(fields: [taskId], references: [id])
+}
